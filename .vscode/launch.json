@@ -1,0 +1,257 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug HardwareDebug (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HardwareDebug/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HardwareDebug",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug HardwareRelease (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HardwareRelease/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HardwareRelease",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug QSPIFlashDebug (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/QSPIFlashDebug/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build QSPIFlashDebug",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug QSPIFlashRelease (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/QSPIFlashRelease/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build QSPIFlashRelease",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug HyperRAMDebug (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HyperRAMDebug/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HyperRAMDebug",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug HyperRAMRelease (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HyperRAMRelease/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HyperRAMRelease",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug HyperRAMClut8Debug (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HyperRAMClut8Debug/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HyperRAMClut8Debug",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Debug HyperRAMClut8Release (J-Link)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/HyperRAMClut8Release/rza2m_thermostat_demo.elf",
+            "preLaunchTask": "Build HyperRAMClut8Release",
+            "runToEntryPoint": "main",
+            "preLaunchCommands": [
+                "set arm fallback-mode arm"
+            ],
+            "overrideLaunchCommands": [
+                "monitor halt",
+                "monitor reset",
+                "load bootloader/rza2_qspi_flash_ddr_bootloader.elf",
+                "load",
+                "monitor reset"
+            ]
+        },
+        {
+            "name": "Attach (J-Link, no download)",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "R7S921053VCBG",
+            "interface": "swd",
+            "serverArgs": [
+                "-speed",
+                "4000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "showDevDebugOutput": "none",
+            "executable": "${workspaceFolder}/build/${input:preset}/rza2m_thermostat_demo.elf",
+            "preAttachCommands": [
+                "set arm fallback-mode arm"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "preset",
+            "type": "pickString",
+            "description": "Build whose ELF provides the symbols",
+            "options": [
+                "HardwareDebug",
+                "HardwareRelease",
+                "QSPIFlashDebug",
+                "QSPIFlashRelease",
+                "HyperRAMDebug",
+                "HyperRAMRelease",
+                "HyperRAMClut8Debug",
+                "HyperRAMClut8Release"
+            ],
+            "default": "HardwareDebug"
+        }
+    ]
+}

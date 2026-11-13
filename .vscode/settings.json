@@ -1,0 +1,26 @@
+{
+    "cmake.useCMakePresets": "always",
+    "cmake.cmakePath": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin/cmake.exe",
+    "cmake.environment": {
+        "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+    },
+    "cmake.configureOnOpen": false,
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "*.ld.in": "linkerscript",
+        "*.asm": "arm",
+        "*.S": "arm"
+    },
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/src/lvgl/**": true
+    },
+    "search.exclude": {
+        "**/build": true,
+        "**/src/lvgl": true,
+        "**/compile_commands.json": true
+    },
+    "cortex-debug.armToolchainPath.windows": "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 rel1/bin",
+    "cortex-debug.JLinkGDBServerPath.windows": "C:/Program Files/SEGGER/JLink_V986a/JLinkGDBServerCL.exe"
+}

@@ -1,0 +1,714 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure HardwareDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HardwareDebug"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HardwareDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HardwareDebug"
+            ],
+            "dependsOn": "Configure HardwareDebug",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HardwareDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HardwareDebug",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure HardwareRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HardwareRelease"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HardwareRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HardwareRelease"
+            ],
+            "dependsOn": "Configure HardwareRelease",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HardwareRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HardwareRelease",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure QSPIFlashDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "QSPIFlashDebug"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build QSPIFlashDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "QSPIFlashDebug"
+            ],
+            "dependsOn": "Configure QSPIFlashDebug",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean QSPIFlashDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "QSPIFlashDebug",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure QSPIFlashRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "QSPIFlashRelease"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build QSPIFlashRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "QSPIFlashRelease"
+            ],
+            "dependsOn": "Configure QSPIFlashRelease",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean QSPIFlashRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "QSPIFlashRelease",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure HyperRAMDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HyperRAMDebug"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HyperRAMDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMDebug"
+            ],
+            "dependsOn": "Configure HyperRAMDebug",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HyperRAMDebug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMDebug",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure HyperRAMRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HyperRAMRelease"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HyperRAMRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMRelease"
+            ],
+            "dependsOn": "Configure HyperRAMRelease",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HyperRAMRelease",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMRelease",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build all (8 configurations)",
+            "dependsOn": [
+                "Build HardwareDebug",
+                "Build HardwareRelease",
+                "Build QSPIFlashDebug",
+                "Build QSPIFlashRelease",
+                "Build HyperRAMDebug",
+                "Build HyperRAMRelease",
+                "Build HyperRAMClut8Debug",
+                "Build HyperRAMClut8Release"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash HardwareDebug (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HardwareDebug"
+            ],
+            "dependsOn": "Build HardwareDebug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash HardwareRelease (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HardwareRelease"
+            ],
+            "dependsOn": "Build HardwareRelease",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash QSPIFlashDebug (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "QSPIFlashDebug"
+            ],
+            "dependsOn": "Build QSPIFlashDebug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash QSPIFlashRelease (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "QSPIFlashRelease"
+            ],
+            "dependsOn": "Build QSPIFlashRelease",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash HyperRAMDebug (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HyperRAMDebug"
+            ],
+            "dependsOn": "Build HyperRAMDebug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash HyperRAMRelease (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HyperRAMRelease"
+            ],
+            "dependsOn": "Build HyperRAMRelease",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flash HardwareRelease, application only (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HardwareRelease",
+                "-NoBootloader"
+            ],
+            "dependsOn": "Build HardwareRelease",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Configure HyperRAMClut8Debug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HyperRAMClut8Debug"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HyperRAMClut8Debug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMClut8Debug"
+            ],
+            "dependsOn": "Configure HyperRAMClut8Debug",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HyperRAMClut8Debug",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMClut8Debug",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash HyperRAMClut8Debug (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HyperRAMClut8Debug"
+            ],
+            "dependsOn": "Build HyperRAMClut8Debug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Configure HyperRAMClut8Release",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--preset",
+                "HyperRAMClut8Release"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build HyperRAMClut8Release",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMClut8Release"
+            ],
+            "dependsOn": "Configure HyperRAMClut8Release",
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Clean HyperRAMClut8Release",
+            "type": "process",
+            "command": "${config:cmake.cmakePath}",
+            "args": [
+                "--build",
+                "--preset",
+                "HyperRAMClut8Release",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash HyperRAMClut8Release (J-Link)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/scripts/jlink_flash.ps1",
+                "-Preset",
+                "HyperRAMClut8Release"
+            ],
+            "dependsOn": "Build HyperRAMClut8Release",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}
