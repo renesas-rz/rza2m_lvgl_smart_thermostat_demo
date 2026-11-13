@@ -1,0 +1,128 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "toolchainFile": "${sourceDir}/cmake/arm-none-eabi-gcc.cmake",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "HardwareDebug",
+            "displayName": "HardwareDebug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "RZA2M_MEMORY_MAP": "Hardware"
+            }
+        },
+        {
+            "name": "HardwareRelease",
+            "displayName": "HardwareRelease",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "RZA2M_MEMORY_MAP": "Hardware"
+            }
+        },
+        {
+            "name": "QSPIFlashDebug",
+            "displayName": "QSPIFlashDebug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "RZA2M_MEMORY_MAP": "QSPIFlash"
+            }
+        },
+        {
+            "name": "QSPIFlashRelease",
+            "displayName": "QSPIFlashRelease",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "RZA2M_MEMORY_MAP": "QSPIFlash"
+            }
+        },
+        {
+            "name": "HyperRAMDebug",
+            "displayName": "HyperRAMDebug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "RZA2M_MEMORY_MAP": "HyperRAM"
+            }
+        },
+        {
+            "name": "HyperRAMRelease",
+            "displayName": "HyperRAMRelease",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "RZA2M_MEMORY_MAP": "HyperRAM"
+            }
+        },
+        {
+            "name": "HyperRAMClut8Debug",
+            "displayName": "HyperRAMClut8Debug (HyperRAM, 8 bpp CLUT8 frame buffers)",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "RZA2M_MEMORY_MAP": "HyperRAM",
+                "RZA2M_FB_CLUT8": "ON"
+            }
+        },
+        {
+            "name": "HyperRAMClut8Release",
+            "displayName": "HyperRAMClut8Release (HyperRAM, 8 bpp CLUT8 frame buffers)",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "RZA2M_MEMORY_MAP": "HyperRAM",
+                "RZA2M_FB_CLUT8": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "HardwareDebug",
+            "configurePreset": "HardwareDebug"
+        },
+        {
+            "name": "HardwareRelease",
+            "configurePreset": "HardwareRelease"
+        },
+        {
+            "name": "QSPIFlashDebug",
+            "configurePreset": "QSPIFlashDebug"
+        },
+        {
+            "name": "QSPIFlashRelease",
+            "configurePreset": "QSPIFlashRelease"
+        },
+        {
+            "name": "HyperRAMDebug",
+            "configurePreset": "HyperRAMDebug"
+        },
+        {
+            "name": "HyperRAMRelease",
+            "configurePreset": "HyperRAMRelease"
+        },
+        {
+            "name": "HyperRAMClut8Debug",
+            "configurePreset": "HyperRAMClut8Debug"
+        },
+        {
+            "name": "HyperRAMClut8Release",
+            "configurePreset": "HyperRAMClut8Release"
+        }
+    ]
+}
