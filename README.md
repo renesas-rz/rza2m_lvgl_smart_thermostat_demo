@@ -17,9 +17,9 @@ Outputs in `build/<preset>/`: `rza2m_thermostat_demo.elf`, `.hex`, `.bin`, `.map
 
 | Preset (configure + build) | Memory map | Frame buffers | HyperRAM use |
 |---|---|---|---|
-| `HardwareDebug` / `HardwareRelease` | Hardware | internal RAM (`0x82180000`, uncached mirror) | resources tagged `RZA2M_RESOURCE_SECTION` go to HyperRAM (none today) |
-| `QSPIFlashDebug` / `QSPIFlashRelease` | QSPIFlash | internal RAM | **zero**: those resources are linked into QSPI flash and read in place; the HyperRAM region has length 0, so any use is a link error |
-| `HyperRAMDebug` / `HyperRAMRelease` | HyperRAM | both VDC frame buffers (1,536,000 bytes) in HyperRAM at `0x40000000` | frame buffers; the MMU maps `0x40000000` L1 write-back cacheable in this map (`-DRZA2M_HYPERRAM_CACHE=OFF` for non-cacheable) |
+| `HardwareDebug` / `HardwareRelease` | QSPI and iSRAM | internal RAM (`0x82180000`, uncached mirror) | **zero**: GUI resources are linked into QSPI flash and read in place; the HyperRAM region has length 0, so any use is a link error) |
+| `HardwareDebug32` / `HardwareRelease32` | QSPI and iSRAM |  internal RAM (`0x82180000`, uncached mirror) | **zero**: GUI resources are linked into QSPI flash and read in place; the HyperRAM region has length 0, so any use is a link error |
+| `HyperRAMDebug` / `HyperRAMRelease` | QSPI, iSRAM, and HyperRAM | both VDC frame buffers (1,536,000 bytes) in HyperRAM at `0x40000000` | frame buffers; the MMU maps `0x40000000` L1 write-back cacheable in this map (`-DRZA2M_HYPERRAM_CACHE=OFF` for non-cacheable) |
 
 Debug = `-O0 -g3`, Release = `-O2`. Each preset builds into `build/<preset>/`. The post-build step prints a memory report
 (bytes in QSPI / HyperRAM / internal RAM). The map is the cache variable `RZA2M_MEMORY_MAP` (`Hardware|QSPIFlash|HyperRAM`).
@@ -75,12 +75,12 @@ Cortex-Debug extension (recommended in `.vscode/extensions.json`).
 
 HyperRAM region in the linker script: `0x40000000`, 14 MB (`0x00E00000`); the real device size is board specific.
 
-| Preset | VDC frame buffer format | Stride | Per buffer | 2 buffers in HyperRAM | % of the 14 MB region | VDC read (avg / peak) | Extra internal RAM |
+| Preset | VDC frame buffer format | Stride | Per buffer | 2 buffers in HyperRAM | % of the 4 MB region | VDC read (avg / peak) | Extra internal RAM |
 |---|---|---|---|---|---|---|---|
-| `Hardware*` | RGB565, internal RAM | 1600 B | 768,000 B | 0 | 0% | - | frame buffers 1,536,512 B (uncached mirror) |
-| `QSPIFlash*` | RGB565, internal RAM | 1600 B | 768,000 B | 0 | 0% | - | as Hardware |
+| `Hardware*` | RGB565, internal RAM | 1600 B | 798,720 B | | 1,597,440 B | 0% | - | frame buffers 1,536,512 B (uncached mirror) |
+| `Hardware32*` | RGB888, internal RAM | 1600 B | 1,597,440 B MB | 3,194,880 B | 0% | - | as Hardware |
 | `HyperRAM*` | RGB565 | 1664 B (128 B aligned) | 798,720 B | 1,597,440 B (`0x40000000`-`0x40186000`) | 10.9% | 46 / 66 MB/s | render buffer 798,720 B (uncached mirror, cached view) |
-| `HyperRAMClut8*` | CLUT8 (8 bpp, 256-colour palette) | 896 B (128 B aligned) | 430,080 B | 860,160 B (`0x40000000`-`0x400D2000`) | 5.9% | 23 / 33 MB/s | render buffer 798,720 B + 64 KB RGB565 lookup table + 1 KB palette |
+| `HyperRAMClut8*` | CLUT8 (8 bpp, 256-colour palette) | 896 B (128 B aligned) | 384,000 B | 798,720 B (`0x40000000`-`0x400D2000`) | 5.9% | 23 / 33 MB/s | render buffer 798,720 B + 64 KB RGB565 lookup table + 1 KB palette |
 
 HyperRAM is only ever written through the uncached alias `0xB0000000` in the HyperRAM presets (changed areas copied from the internal-RAM render
 buffer, converted to palette indices in the CLUT8 presets). Start-up self test and bench touch the first 1 KB (non-destructive) / 256 KB (read only).
