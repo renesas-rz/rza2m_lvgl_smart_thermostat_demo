@@ -1,6 +1,6 @@
 /**
  * @file thermostat_ui_elite.c
- * @brief Premium minimal thermostat HMI for RZ/A2M (LVGL 9, 800 x 480, RGB565).
+ * @brief Premium minimal thermostat HMI for RZ/A2M (LVGL 9, 800 x 480, RGB 16/32-bit).
  *
  * Screens
  *   Home    : weather | time, large indoor temperature, schedule / equipment
@@ -12,6 +12,10 @@
  *             Equipment Status
  *   Idle    : full-screen idle view after inactivity, 3 styles
  *             (Dashboard, Analog clock, Text) x 7 accent colors
+ *
+ * Navigation
+ *   Swipe up / down on Home, Mode, Fan, and Menu transitions between those
+ *   four views in order (Home <-> Mode <-> Fan <-> Menu).
  *
  * Same threading contract as thermostat_ui.c: the UI reads snapshots and posts
  * commands; it never touches the live model. Theme or style changes rebuild the
@@ -79,6 +83,9 @@
 #define REFRESH_MS  (200u)
 #define PENDING_MS  (1500u)
 
+#define SLIDE_TIME_MS   (220u)
+#define SLIDE_NAV_STEP  (86)     /* matches nav_item y spacing (92 + idx * 86) */
+
 /* ============================================================== theme */
 typedef struct {
     lv_color_t bg, fg, dim, card, line, sel, accent;
@@ -94,7 +101,7 @@ typedef enum { IDLE_DASH = 0, IDLE_CLOCK, IDLE_TEXT, IDLE_STYLE_COUNT } idle_sty
 static const char * const s_idle_names[IDLE_STYLE_COUNT] = { "Dashboard", "Clock", "Text" };
 
 typedef enum {
-    PG_HOME = 0, PG_MODE, PG_FAN, PG_MENU,                     /* with nav rail */
+    PG_HOME = 0, PG_MODE, PG_FAN, PG_MENU,                     /* with nav rail + vertical swipe */
     PG_PRIORITY, PG_VENT, PG_IDLEPICK, PG_DISPLAY, PG_STATUS,  /* full screen + Back */
     PG_COUNT
 } page_t;
@@ -195,6 +202,8 @@ typedef struct {
     bool       pend_valid;
     tdeci_t    pend_val;
     uint32_t   pend_tick;
+
+    bool sliding;
 } ui_t;
 
 static ui_t             s_ui;
@@ -216,6 +225,20 @@ static int32_t div_round(int32_t n, int32_t d)
     return (n >= 0) ? ((n + d / 2) / d) : -((-n + d / 2) / d);
 }
 
+static const char * elite_color_format_label(void)
+{
+    lv_display_t * disp = lv_display_get_default();
+    if (NULL == disp) { return "RGB"; }
+
+    switch (lv_display_get_color_format(disp)) {
+        case LV_COLOR_FORMAT_RGB565:         return "RGB565 (16-bit)";
+        case LV_COLOR_FORMAT_RGB565_SWAPPED: return "RGB565_SWAPPED (16-bit)";
+        case LV_COLOR_FORMAT_XRGB8888:       return "XRGB8888 (32-bit)";
+        case LV_COLOR_FORMAT_ARGB8888:       return "ARGB8888 (32-bit)";
+        default:                             return "RGB (16/32-bit)";
+    }
+}
+
 static void theme_init(void)
 {
     theme_t * t = &s_ui.T;
@@ -226,7 +249,7 @@ static void theme_init(void)
     } else {
         t->bg = lv_color_hex(0xFFFFFF); t->fg = lv_color_hex(0x111111); t->dim = lv_color_hex(0x6E6E73);
         t->card = lv_color_hex(0xEFEFF2); t->line = lv_color_hex(0xC7C7CC); t->sel = lv_color_hex(0xFFFFFF);
-        t->heat = lv_color_hex(0xC2410C); t->cool = lv_color_hex(0x1D5FBF);   /* >= 4.5:1 on white */
+        t->heat = lv_color_hex(0xC2410C); t->cool = lv_color_hex(0x1D5FBF);
     }
     t->accent = lv_color_hex(s_accents[s_cfg.accent % ACCENT_COUNT]);
 }
@@ -237,26 +260,11 @@ static void set_text(lv_obj_t * l, const char * txt)
     if ((NULL == cur) || (0 != strcmp(cur, txt))) { lv_label_set_text(l, txt); }
 }
 
-/* LVGL invalidates (redraws) a widget on every style/flag/size/position setter, even when the new value equals the
- * old one. The periodic refresh therefore only writes a value that actually changed; an unconditional
- * ui_set_arc_color() on the 340 px dial alone redrew about 30% of the screen once per second. */
 static void set_hidden(lv_obj_t * obj, bool hidden)
 {
     if (hidden == lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN)) { return; }
     if (hidden) { lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN); }
     else        { lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN); }
-}
-
-static void set_clickable(lv_obj_t * obj, bool clickable)
-{
-    if (clickable == lv_obj_has_flag(obj, LV_OBJ_FLAG_CLICKABLE)) { return; }
-    if (clickable) { lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE); }
-    else           { lv_obj_remove_flag(obj, LV_OBJ_FLAG_CLICKABLE); }
-}
-
-static void ui_set_arc_color(lv_obj_t * o, lv_color_t c, lv_part_t part)
-{
-    if (!lv_color_eq(lv_obj_get_style_arc_color(o, part), c)) { lv_obj_set_style_arc_color(o, c, part); }
 }
 
 static void ui_set_text_color(lv_obj_t * o, lv_color_t c, lv_part_t part)
@@ -284,22 +292,6 @@ static void ui_set_opa(lv_obj_t * o, lv_opa_t opa, lv_part_t part)
     if (lv_obj_get_style_opa(o, part) != opa) { lv_obj_set_style_opa(o, opa, part); }
 }
 
-static void ui_set_x(lv_obj_t * o, int32_t x)
-{
-    if (lv_obj_get_style_x(o, LV_PART_MAIN) != x) { lv_obj_set_x(o, x); }
-}
-
-static void ui_set_y(lv_obj_t * o, int32_t y)
-{
-    if (lv_obj_get_style_y(o, LV_PART_MAIN) != y) { lv_obj_set_y(o, y); }
-}
-
-static void ui_set_height(lv_obj_t * o, int32_t h)
-{
-    if (lv_obj_get_style_height(o, LV_PART_MAIN) != h) { lv_obj_set_height(o, h); }
-}
-
-/** whole-degree display value (hero font has no '.') */
 static int32_t disp_whole(tdeci_t f)
 {
     return s_cfg.celsius ? div_round(tstat_deci_f_to_deci_c(f), 10) : div_round(f, 10);
@@ -310,7 +302,6 @@ static void fmt_deg(char * b, size_t n, tdeci_t f)
     lv_snprintf(b, n, "%d" DEG, (int)disp_whole(f));
 }
 
-/** setpoint text: F integer, C in 0.5 steps */
 static void fmt_sp(char * b, size_t n, tdeci_t f)
 {
     if (s_cfg.celsius) {
@@ -370,6 +361,7 @@ static lv_obj_t * box(lv_obj_t * p, int32_t x, int32_t y, int32_t w, int32_t h)
     lv_obj_set_pos(o, x, y);
     lv_obj_set_size(o, w, h);
     lv_obj_remove_flag(o, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(o, LV_OBJ_FLAG_GESTURE_BUBBLE);
     return o;
 }
 
@@ -379,17 +371,17 @@ static lv_obj_t * label(lv_obj_t * p, const lv_font_t * f, lv_color_t c, const c
     lv_obj_set_style_text_font(l, f, 0);
     ui_set_text_color(l, c, 0);
     lv_label_set_text(l, t);
+    lv_obj_add_flag(l, LV_OBJ_FLAG_GESTURE_BUBBLE);
     return l;
 }
 
-/** Outlined card (unselected 1 px line, selected 3 px fg) */
 static lv_obj_t * card(lv_obj_t * p, int32_t x, int32_t y, int32_t w, int32_t h, lv_event_cb_t cb, void * ud)
 {
     lv_obj_t * c = box(p, x, y, w, h);
     lv_obj_set_style_radius(c, 12, 0);
     lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
     ui_set_bg_color(c, s_ui.T.bg, 0);
-    ui_set_bg_color(c, s_ui.T.card, LV_STATE_PRESSED);
+    ui_set_bg_color(c, s_ui.T.card, LV_PART_MAIN | LV_STATE_PRESSED);
     ui_set_border_width(c, 1, 0);
     ui_set_border_color(c, s_ui.T.line, 0);
     lv_obj_set_style_pad_all(c, 14, 0);
@@ -406,7 +398,6 @@ static void card_select(lv_obj_t * c, bool sel)
     ui_set_border_color(c, sel ? s_ui.T.fg : s_ui.T.line, 0);
 }
 
-/** Pill button. solid: filled fg with bg text; else outlined. */
 static lv_obj_t * pill(lv_obj_t * p, int32_t x, int32_t y, int32_t w, int32_t h, const char * t, bool solid,
                        const lv_font_t * f, lv_event_cb_t cb, void * ud)
 {
@@ -417,14 +408,13 @@ static lv_obj_t * pill(lv_obj_t * p, int32_t x, int32_t y, int32_t w, int32_t h,
     ui_set_bg_color(b, s_ui.T.fg, 0);
     ui_set_border_width(b, solid ? 0 : 2, 0);
     ui_set_border_color(b, s_ui.T.fg, 0);
-    ui_set_opa(b, LV_OPA_70, LV_STATE_PRESSED);
+    ui_set_opa(b, LV_OPA_70, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * l = label(b, f, solid ? s_ui.T.bg : s_ui.T.fg, t);
     lv_obj_center(l);
     if (NULL != cb) { lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud); }
     return b;
 }
 
-/** Segmented control; returns container, fills btns[] */
 static lv_obj_t * segmented(lv_obj_t * p, int32_t cx, int32_t y, const char * const * names, int n,
                             int32_t seg_w, lv_obj_t ** btns, lv_event_cb_t cb)
 {
@@ -455,7 +445,6 @@ static void segmented_set(lv_obj_t ** btns, int n, int sel)
     }
 }
 
-/* -------- simple vector icons (static points shared by all instances) */
 static const lv_point_precise_t s_snow_a[2] = { { 16, 1 }, { 16, 31 } };
 static const lv_point_precise_t s_snow_b[2] = { {  3, 9 }, { 29, 23 } };
 static const lv_point_precise_t s_snow_c[2] = { {  3, 23 }, { 29, 9 } };
@@ -468,6 +457,7 @@ static lv_obj_t * icon_line(lv_obj_t * p, const lv_point_precise_t * pts, lv_col
     lv_obj_set_style_line_color(l, c, 0);
     lv_obj_set_style_line_rounded(l, true, 0);
     lv_obj_set_pos(l, 0, 0);
+    lv_obj_add_flag(l, LV_OBJ_FLAG_GESTURE_BUBBLE);
     return l;
 }
 
@@ -490,7 +480,6 @@ static lv_obj_t * icon_sun(lv_obj_t * p, int32_t d)
     return o;
 }
 
-/** content-sized flex row (items centred vertically unless align_top) */
 static lv_obj_t * flex_row(lv_obj_t * p)
 {
     lv_obj_t * r = lv_obj_create(p);
@@ -500,6 +489,7 @@ static lv_obj_t * flex_row(lv_obj_t * p)
     lv_obj_set_flex_align(r, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(r, 14, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(r, LV_OBJ_FLAG_GESTURE_BUBBLE);
     return r;
 }
 
@@ -515,6 +505,145 @@ static lv_obj_t * vbar(lv_obj_t * p)
 
 static void refresh_all(void);
 
+#if 1 // Add Sliding Transition
+
+typedef struct {
+    lv_obj_t * page;
+    bool       hide_after;
+} slide_finish_ctx_t;
+
+static slide_finish_ctx_t s_slide_out_ctx;
+static slide_finish_ctx_t s_slide_in_ctx;
+
+static void slide_anim_y_cb(void * var, int32_t v)
+{
+    lv_obj_set_y((lv_obj_t *)var, v);
+}
+
+static void slide_finish_cb(lv_anim_t * a)
+{
+    slide_finish_ctx_t * ctx = (slide_finish_ctx_t *)a->user_data;
+    if (NULL == ctx || NULL == ctx->page) { return; }
+
+    lv_obj_set_y(ctx->page, 0);
+    if (ctx->hide_after) {
+        lv_obj_add_flag(ctx->page, LV_OBJ_FLAG_HIDDEN);
+    }
+    s_ui.sliding = false;
+}
+
+static void update_nav_highlight(page_t pg, bool animate)
+{
+    set_hidden(s_ui.nav, pg > PG_NAV_LAST);
+    if (pg > PG_NAV_LAST) { return; }
+
+    for (int i = 0; i < 4; i++) {
+        bool sel = (i == (int)pg);
+        lv_obj_t * it = s_ui.nav_item[i];
+        uint32_t n = lv_obj_get_child_count(it);
+        for (uint32_t k = 0; k < n; k++) {
+            lv_obj_t * ch = lv_obj_get_child(it, (int32_t)k);
+            if (lv_obj_check_type(ch, &lv_label_class)) {
+                ui_set_text_color(ch, sel ? s_ui.T.fg : s_ui.T.dim, 0);
+            } else {
+                uint32_t nl = lv_obj_get_child_count(ch);
+                for (uint32_t q = 0; q < nl; q++) {
+                    lv_obj_set_style_line_color(lv_obj_get_child(ch, (int32_t)q), sel ? s_ui.T.fg : s_ui.T.dim, 0);
+                }
+            }
+        }
+        lv_obj_set_style_bg_opa(it, sel ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+        if (animate && sel) {
+            lv_anim_t na;
+            lv_anim_init(&na);
+            lv_anim_set_var(&na, it);
+            lv_anim_set_values(&na, 92 + i * SLIDE_NAV_STEP, 92 + i * SLIDE_NAV_STEP);
+            lv_anim_set_duration(&na, SLIDE_TIME_MS);
+            lv_anim_start(&na);
+        }
+    }
+}
+
+static void show_page_ex(page_t pg, lv_dir_t slide_dir)
+{
+    page_t prev = s_cfg.page;
+    bool do_slide = (prev != pg) && (prev <= PG_NAV_LAST) && (pg <= PG_NAV_LAST) &&
+                    ((LV_DIR_TOP == slide_dir) || (LV_DIR_BOTTOM == slide_dir));
+
+    s_cfg.page = pg;
+
+    if (!do_slide) {
+        s_ui.sliding = false;
+        for (int i = 0; i < PG_COUNT; i++) {
+            lv_anim_delete(s_ui.page[i], slide_anim_y_cb);
+            lv_obj_set_y(s_ui.page[i], 0);
+            set_hidden(s_ui.page[i], i != (int)pg);
+        }
+        update_nav_highlight(pg, false);
+        if (s_have_snap) { refresh_all(); }
+        return;
+    }
+
+    int32_t enter_start_y = (LV_DIR_TOP == slide_dir) ? SCR_H : -SCR_H;
+    int32_t exit_end_y    = (LV_DIR_TOP == slide_dir) ? -SCR_H : SCR_H;
+
+    for (int i = 0; i < PG_COUNT; i++) {
+        lv_anim_delete(s_ui.page[i], slide_anim_y_cb);
+        if ((i != (int)prev) && (i != (int)pg)) {
+            lv_obj_set_y(s_ui.page[i], 0);
+            set_hidden(s_ui.page[i], true);
+        }
+    }
+
+    lv_obj_t * out_pg = s_ui.page[prev];
+    lv_obj_t * in_pg  = s_ui.page[pg];
+
+    lv_obj_remove_flag(in_pg, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_y(out_pg, 0);
+    lv_obj_set_y(in_pg, enter_start_y);
+
+    /* Keep nav rail and badge above sliding pages */
+    lv_obj_move_foreground(s_ui.nav);
+    if (NULL != s_ui.badge) { lv_obj_move_foreground(s_ui.badge); }
+
+    s_ui.sliding = true;
+
+    s_slide_out_ctx.page = out_pg;
+    s_slide_out_ctx.hide_after = true;
+    lv_anim_t a_out;
+    lv_anim_init(&a_out);
+    lv_anim_set_var(&a_out, out_pg);
+    lv_anim_set_values(&a_out, 0, exit_end_y);
+    lv_anim_set_duration(&a_out, SLIDE_TIME_MS);
+    lv_anim_set_path_cb(&a_out, lv_anim_path_ease_out);
+    lv_anim_set_exec_cb(&a_out, slide_anim_y_cb);
+    lv_anim_set_user_data(&a_out, &s_slide_out_ctx);
+    lv_anim_set_ready_cb(&a_out, slide_finish_cb);
+    lv_anim_start(&a_out);
+
+    s_slide_in_ctx.page = in_pg;
+    s_slide_in_ctx.hide_after = false;
+    lv_anim_t a_in;
+    lv_anim_init(&a_in);
+    lv_anim_set_var(&a_in, in_pg);
+    lv_anim_set_values(&a_in, enter_start_y, 0);
+    lv_anim_set_duration(&a_in, SLIDE_TIME_MS);
+    lv_anim_set_path_cb(&a_in, lv_anim_path_ease_out);
+    lv_anim_set_exec_cb(&a_in, slide_anim_y_cb);
+    lv_anim_set_user_data(&a_in, &s_slide_in_ctx);
+    lv_anim_set_ready_cb(&a_in, slide_finish_cb);
+    lv_anim_start(&a_in);
+
+    update_nav_highlight(pg, true);
+    if (s_have_snap) { refresh_all(); }
+}
+
+static void show_page(page_t pg)
+{
+    show_page_ex(pg, LV_DIR_NONE);
+}
+
+#else
 static void show_page(page_t pg)
 {
     s_cfg.page = pg;
@@ -529,7 +658,7 @@ static void show_page(page_t pg)
             if (lv_obj_check_type(ch, &lv_label_class)) {
                 ui_set_text_color(ch, sel ? s_ui.T.fg : s_ui.T.dim, 0);
             } else {
-                uint32_t nl = lv_obj_get_child_count(ch);   /* vector icon */
+                uint32_t nl = lv_obj_get_child_count(ch);
                 for (uint32_t q = 0; q < nl; q++) {
                     lv_obj_set_style_line_color(lv_obj_get_child(ch, (int32_t)q), sel ? s_ui.T.fg : s_ui.T.dim, 0);
                 }
@@ -539,15 +668,76 @@ static void show_page(page_t pg)
     }
     if (s_have_snap) { refresh_all(); }
 }
+#endif
 
 static void nav_cb(lv_event_t * e)   { show_page((page_t)(uintptr_t)lv_event_get_user_data(e)); }
 static void back_cb(lv_event_t * e)  { (void)e; show_page(PG_MENU); }
 
+static bool is_active_control_pressed(void)
+{
+    if ((NULL != s_ui.h_up) && lv_obj_has_state(s_ui.h_up, LV_STATE_PRESSED)) { return true; }
+    if ((NULL != s_ui.h_down) && lv_obj_has_state(s_ui.h_down, LV_STATE_PRESSED)) { return true; }
+    return false;
+}
+
+#if 1
+static void gesture_cb(lv_event_t * e)
+{
+    if (LV_EVENT_GESTURE != lv_event_get_code(e)) { return; }
+    if (s_ui.idle_on || s_ui.sliding) { return; }
+    if (s_cfg.page > PG_NAV_LAST) { return; }
+    if (is_active_control_pressed()) { return; }
+
+    lv_indev_t * indev = lv_indev_active();
+    if (NULL == indev) { return; }
+
+    lv_dir_t dir = lv_indev_get_gesture_dir(indev);
+    int cur = (int)s_cfg.page;
+
+    if (LV_DIR_TOP == dir) {
+        if (cur < (int)PG_NAV_LAST) {
+            show_page_ex((page_t)(cur + 1), LV_DIR_TOP);
+            lv_indev_wait_release(indev);
+        }
+    } else if (LV_DIR_BOTTOM == dir) {
+        if (cur > (int)PG_HOME) {
+            show_page_ex((page_t)(cur - 1), LV_DIR_BOTTOM);
+            lv_indev_wait_release(indev);
+        }
+    }
+}
+#else
+static void gesture_cb(lv_event_t * e)
+{
+    if (LV_EVENT_GESTURE != lv_event_get_code(e)) { return; }
+    if (s_ui.idle_on) { return; }
+    if (s_cfg.page > PG_NAV_LAST) { return; }
+    if (is_active_control_pressed()) { return; }
+
+    lv_indev_t * indev = lv_indev_active();
+    if (NULL == indev) { return; }
+
+    lv_dir_t dir = lv_indev_get_gesture_dir(indev);
+    int cur = (int)s_cfg.page;
+
+    if (LV_DIR_TOP == dir) {
+        if (cur < (int)PG_NAV_LAST) {
+            show_page((page_t)(cur + 1));
+            lv_indev_wait_release(indev);
+        }
+    } else if (LV_DIR_BOTTOM == dir) {
+        if (cur > (int)PG_HOME) {
+            show_page((page_t)(cur - 1));
+            lv_indev_wait_release(indev);
+        }
+    }
+}
+#endif
 static lv_obj_t * subpage_header(lv_obj_t * pg, const char * title)
 {
     lv_obj_t * b = box(pg, 12, 10, 150, 56);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    ui_set_opa(b, LV_OPA_60, LV_STATE_PRESSED);
+    ui_set_opa(b, LV_OPA_60, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * l = label(b, F_28, s_ui.T.fg, LV_SYMBOL_LEFT "  Back");
     lv_obj_align(l, LV_ALIGN_LEFT_MID, 8, 0);
     lv_obj_add_event_cb(b, back_cb, LV_EVENT_CLICKED, NULL);
@@ -645,7 +835,6 @@ static void build_home(lv_obj_t * pg)
 {
     const theme_t * T = &s_ui.T;
 
-    /* top: sun  45° | 1:32  (centre y ~43) */
     lv_obj_t * top = flex_row(pg);
     lv_obj_align(top, LV_ALIGN_TOP_MID, CX_OFS, 24);
     icon_sun(top, 26);
@@ -653,7 +842,6 @@ static void build_home(lv_obj_t * pg)
     vbar(top);
     s_ui.h_time = label(top, F_32, T->fg, "--:--");
 
-    /* hero: 200 px indoor temperature (centre y ~216) */
     s_ui.h_temp = label(pg, F_HERO, T->fg, "--");
     lv_obj_align(s_ui.h_temp, LV_ALIGN_CENTER, CX_OFS, -24);
 
@@ -663,11 +851,9 @@ static void build_home(lv_obj_t * pg)
     lv_obj_set_ext_click_area(s_ui.h_sched, 20);
     lv_obj_add_event_cb(s_ui.h_sched, sched_tap_cb, LV_EVENT_CLICKED, NULL);
 
-    /* equipment status, colour set per state in refresh_home() */
     s_ui.h_equip = label(pg, F_24, T->dim, "");
     lv_obj_align(s_ui.h_equip, LV_ALIGN_CENTER, CX_OFS, 116);
 
-    /* bottom: tint 46% | house Good (centre y ~417) */
     lv_obj_t * bot = flex_row(pg);
     lv_obj_align(bot, LV_ALIGN_BOTTOM_MID, CX_OFS, -44);
     label(bot, F_ICON32, T->dim, LV_SYMBOL_TINT);
@@ -676,16 +862,13 @@ static void build_home(lv_obj_t * pg)
     label(bot, F_ICON32, T->dim, LV_SYMBOL_HOME);
     s_ui.h_iaq = label(bot, F_32, T->fg, "--");
 
-    /* brand */
     lv_obj_t * br = label(pg, F_16, T->dim, "RENESAS  RZ/A2M");
     lv_obj_set_style_text_letter_space(br, 3, 0);
     lv_obj_align(br, LV_ALIGN_BOTTOM_MID, CX_OFS, -8);
 
-    /* right setpoint column, centred on RC_CX */
     s_ui.h_up      = chevron(pg, RC_CX - 65, 96, LV_SYMBOL_UP, 1);
     s_ui.h_sp_cap  = sp_label(pg, F_28, T->fg, RC_CX - 80, 184, 160);
     s_ui.h_sp_val  = sp_label(pg, F_SP, T->fg, RC_CX - 80, 220, 160);
-    /* Auto mode: two stacked, colour-coded setpoints */
     s_ui.h_sp_heat = sp_label(pg, F_40, T->heat, RC_CX - 80, 186, 160);
     s_ui.h_sp_cool = sp_label(pg, F_40, T->cool, RC_CX - 80, 240, 160);
     s_ui.h_down    = chevron(pg, RC_CX - 65, 300, LV_SYMBOL_DOWN, -1);
@@ -743,7 +926,6 @@ static void refresh_home(const tstat_model_t * m)
         set_text(s_ui.h_sp_val, "Off");
         lv_obj_set_style_text_font(s_ui.h_sp_val, F_48, 0);
     } else if (autm) {
-        /* 0.5 C steps make the text wider: drop to 32 px so it stays on one line */
         const lv_font_t * af = s_cfg.celsius ? F_32 : F_40;
         lv_obj_set_style_text_font(s_ui.h_sp_heat, af, 0);
         lv_obj_set_style_text_font(s_ui.h_sp_cool, af, 0);
@@ -754,7 +936,6 @@ static void refresh_home(const tstat_model_t * m)
     } else {
         set_text(s_ui.h_sp_cap, (TSTAT_MODE_COOL == m->mode) ? "Cool to" : "Heat to");
         fmt_sp(t1, sizeof(t1), home_target(m));
-        /* "20.5" at 88 px is wider than the column: use 64 px for half degrees */
         lv_obj_set_style_text_font(s_ui.h_sp_val, (NULL != strchr(t1, '.')) ? F_64 : F_SP, 0);
         set_text(s_ui.h_sp_val, t1);
     }
@@ -895,7 +1076,7 @@ static void pr_tab_cb(lv_event_t * e)
 
 static void pr_room_cb(lv_event_t * e)
 {
-    if (1u == s_ui.pr_tab) { return; }      /* read-only in Active Rooms */
+    if (1u == s_ui.pr_tab) { return; }
     int i = (int)(uintptr_t)lv_event_get_user_data(e);
     s_ui.pr_sel[i] = !s_ui.pr_sel[i];
     refresh_all();
@@ -956,7 +1137,6 @@ static void refresh_priority(const tstat_model_t * m)
     set_text(s_ui.pr_hint, b);
 }
 
-/** Active Rooms mode: follow occupancy (falls back to all rooms if none active) */
 static void priority_auto_apply(const tstat_model_t * m)
 {
     if (!s_cfg.priority_active) { return; }
@@ -1080,9 +1260,6 @@ static void iv_build(idle_view_t * v, lv_obj_t * parent, int32_t w, int32_t h, u
     lv_obj_remove_flag(v->root, LV_OBJ_FLAG_CLICKABLE);
 
     if (IDLE_DASH == style) {
-        /* Each value is centred in its own half (0..w/2 and w/2..w), so both are
-         * symmetric about the centre divider. "12:59" at 150 px is 372 px wide,
-         * which fits the 400 px half. */
         const int32_t hy = big ? 56 : 8, hh = big ? 220 : 72;
         lv_obj_t * lh = box(v->root, 0, hy, w / 2, hh);
         lv_obj_t * rh = box(v->root, w / 2, hy, w / 2, hh);
@@ -1112,7 +1289,7 @@ static void iv_build(idle_view_t * v, lv_obj_t * parent, int32_t w, int32_t h, u
         lv_obj_set_style_radius(face, LV_RADIUS_CIRCLE, 0);
         ui_set_border_width(face, big ? 3 : 2, 0);
         ui_set_border_color(face, T->line, 0);
-        for (int k = 0; k < 12; k++) {          /* hour dots */
+        for (int k = 0; k < 12; k++) {
             int32_t r  = d / 2 - (big ? 20 : 8);
             int32_t dx = (r * lv_trigo_sin((int16_t)(k * 30))) / 32768;
             int32_t dy = (r * lv_trigo_cos((int16_t)(k * 30))) / 32768;
@@ -1212,7 +1389,7 @@ static void overlay_click_cb(lv_event_t * e);
 static void overlay_restore(void * p)
 {
     (void)p;
-    overlay_build();                         /* back to the saved style */
+    overlay_build();
     lv_obj_add_event_cb(s_ui.overlay, overlay_click_cb, LV_EVENT_CLICKED, NULL);
 }
 
@@ -1223,7 +1400,7 @@ static void overlay_click_cb(lv_event_t * e)
     lv_display_trigger_activity(NULL);
     if (s_ui.overlay_preview) {
         s_ui.overlay_preview = false;
-        lv_async_call(overlay_restore, NULL); /* never delete the object inside its own event */
+        lv_async_call(overlay_restore, NULL);
     }
 }
 
@@ -1278,7 +1455,7 @@ static void ip_save_cb(lv_event_t * e)
     s_cfg.idle_style = s_ui.ip_style;
     s_cfg.accent     = s_ui.ip_accent;
     s_cfg.page       = PG_MENU;
-    lv_async_call(async_rebuild, NULL);       /* accent is used across the UI */
+    lv_async_call(async_rebuild, NULL);
 }
 
 static void ip_preview_cb(lv_event_t * e)
@@ -1473,8 +1650,10 @@ static void build_status(lv_obj_t * pg)
         s_ui.st_val[i] = label(r, F_20, s_ui.T.fg, "");
         lv_obj_align(s_ui.st_val[i], LV_ALIGN_RIGHT_MID, 0, 0);
     }
-    lv_snprintf(b, sizeof(b), "RZ/A2M  |  FreeRTOS %s  |  LVGL %d.%d.%d", thermostat_service_rtos_version(),
-                LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH);
+    lv_snprintf(b, sizeof(b), "RZ/A2M  |  FreeRTOS %s  |  LVGL %d.%d.%d  |  %s",
+                thermostat_service_rtos_version(),
+                LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH,
+                elite_color_format_label());
     lv_label_set_text(s_ui.st_val[7], b);
     s_ui.st_perf = label(pg, F_16, s_ui.T.accent, "");
     lv_obj_align(s_ui.st_perf, LV_ALIGN_BOTTOM_MID, 0, -8);
@@ -1544,7 +1723,6 @@ static void timer_cb(lv_timer_t * t)
         priority_auto_apply(&s_snap.model);
         refresh_all();
     }
-    /* idle screen */
     if ((s_cfg.idle_timeout_s > 0u) && !s_ui.idle_on && (PG_IDLEPICK != s_cfg.page) &&
         (lv_display_get_inactive_time(NULL) > (uint32_t)s_cfg.idle_timeout_s * 1000u)) {
         if (PG_HOME != s_cfg.page) { show_page(PG_HOME); }
@@ -1567,10 +1745,10 @@ static void build_all(void)
     lv_obj_set_style_bg_opa(s_ui.scr, LV_OPA_COVER, 0);
     ui_set_bg_color(s_ui.scr, s_ui.T.bg, 0);
     lv_obj_remove_flag(s_ui.scr, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(s_ui.scr, gesture_cb, LV_EVENT_GESTURE, NULL);
 
     for (int i = 0; i < PG_COUNT; i++) { s_ui.page[i] = box(s_ui.scr, 0, 0, SCR_W, SCR_H); }
 
-    /* nav rail (drawn above pages) */
     s_ui.nav = box(s_ui.scr, 0, 0, NAV_W, SCR_H);
     s_ui.nav_item[0] = nav_item(s_ui.nav, 0, LV_SYMBOL_HOME,    "Home");
     s_ui.nav_item[1] = nav_item(s_ui.nav, 1, NULL,              "Mode");
