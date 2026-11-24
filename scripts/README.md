@@ -60,7 +60,15 @@ Open a Windows Command terminal in the `<Project_Root>` directory and run the sc
 
 **Flash both the bootloader and application (Release build):**
 ```powershell
+# 16 Bit Demo
 powershell -ExecutionPolicy Bypass -File .\scripts\jlink_flash.ps1 -Preset HardwareRelease
+
+# 32 Bit Demo
+powershell -ExecutionPolicy Bypass -File .\scripts\jlink_flash.ps1 -Preset HardwareRelease32  
+  
+# HyperFlash with CLUT8  
+powershell -ExecutionPolicy Bypass -File .\scripts\jlink_flash.ps1 -Preset HardwareRelease32
+yperRAMClut8Release
 ```
 
 **Flash only the application (skip bootloader):**
