@@ -33,7 +33,7 @@
 #>
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('HardwareDebug', 'HardwareRelease', 'QSPIFlashDebug', 'QSPIFlashRelease',
+    [ValidateSet('HardwareDebug', 'HardwareRelease', 'HardwareDebug32', 'HardwareRelease32',
                  'HyperRAMDebug', 'HyperRAMRelease', 'HyperRAMClut8Debug', 'HyperRAMClut8Release')]
     [string]$Preset,
     [string]$Device = 'R7S921053VCBG',

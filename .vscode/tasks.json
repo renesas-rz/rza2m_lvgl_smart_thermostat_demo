@@ -130,12 +130,12 @@
             "problemMatcher": []
         },
         {
-            "label": "Configure QSPIFlashDebug",
+            "label": "Configure HardwareDebug32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--preset",
-                "QSPIFlashDebug"
+                "HardwareDebug32"
             ],
             "options": {
                 "env": {
@@ -149,15 +149,15 @@
             }
         },
         {
-            "label": "Build QSPIFlashDebug",
+            "label": "Build HardwareDebug32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--build",
                 "--preset",
-                "QSPIFlashDebug"
+                "HardwareDebug32"
             ],
-            "dependsOn": "Configure QSPIFlashDebug",
+            "dependsOn": "Configure HardwareDebug32",
             "options": {
                 "env": {
                     "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
@@ -176,13 +176,13 @@
             }
         },
         {
-            "label": "Clean QSPIFlashDebug",
+            "label": "Clean HardwareDebug32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--build",
                 "--preset",
-                "QSPIFlashDebug",
+                "HardwareDebug32",
                 "--target",
                 "clean"
             ],
@@ -194,12 +194,12 @@
             "problemMatcher": []
         },
         {
-            "label": "Configure QSPIFlashRelease",
+            "label": "Configure HardwareRelease32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--preset",
-                "QSPIFlashRelease"
+                "HardwareRelease32"
             ],
             "options": {
                 "env": {
@@ -213,15 +213,15 @@
             }
         },
         {
-            "label": "Build QSPIFlashRelease",
+            "label": "Build HardwareRelease32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--build",
                 "--preset",
-                "QSPIFlashRelease"
+                "HardwareRelease32"
             ],
-            "dependsOn": "Configure QSPIFlashRelease",
+            "dependsOn": "Configure HardwareRelease32",
             "options": {
                 "env": {
                     "PATH": "C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.cmake.win32.x86_64_3.27.6.v20231010-1103/cmake/bin;C:/Renesas/e2_studio-2024-07/eclipse/plugins/com.renesas.ide.exttools.ninja.win32.x86_64_1.11.1.v20231010-1103/n;${env:PATH}"
@@ -232,7 +232,7 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
             "presentation": {
                 "reveal": "always",
@@ -240,13 +240,13 @@
             }
         },
         {
-            "label": "Clean QSPIFlashRelease",
+            "label": "Clean HardwareRelease32",
             "type": "process",
             "command": "${config:cmake.cmakePath}",
             "args": [
                 "--build",
                 "--preset",
-                "QSPIFlashRelease",
+                "HardwareRelease32",
                 "--target",
                 "clean"
             ],
@@ -390,8 +390,8 @@
             "dependsOn": [
                 "Build HardwareDebug",
                 "Build HardwareRelease",
-                "Build QSPIFlashDebug",
-                "Build QSPIFlashRelease",
+                "Build HardwareDebug32",
+                "Build HardwareRelease32",
                 "Build HyperRAMDebug",
                 "Build HyperRAMRelease",
                 "Build HyperRAMClut8Debug",
@@ -441,8 +441,8 @@
                 "panel": "shared"
             }
         },
-        {
-            "label": "Flash QSPIFlashDebug (J-Link)",
+                {
+            "label": "Flash HardwareDebug32 (J-Link)",
             "type": "process",
             "command": "powershell.exe",
             "args": [
@@ -452,9 +452,9 @@
                 "-File",
                 "${workspaceFolder}/scripts/jlink_flash.ps1",
                 "-Preset",
-                "QSPIFlashDebug"
+                "HardwareDebug32"
             ],
-            "dependsOn": "Build QSPIFlashDebug",
+            "dependsOn": "Build HardwareDebug32",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
@@ -462,7 +462,7 @@
             }
         },
         {
-            "label": "Flash QSPIFlashRelease (J-Link)",
+            "label": "Flash HardwareRelease32 (J-Link)",
             "type": "process",
             "command": "powershell.exe",
             "args": [
@@ -472,9 +472,9 @@
                 "-File",
                 "${workspaceFolder}/scripts/jlink_flash.ps1",
                 "-Preset",
-                "QSPIFlashRelease"
+                "HardwareRelease32"
             ],
-            "dependsOn": "Build QSPIFlashRelease",
+            "dependsOn": "Build HardwareRelease32",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",

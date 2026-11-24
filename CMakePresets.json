@@ -35,21 +35,24 @@
             }
         },
         {
-            "name": "QSPIFlashDebug",
-            "displayName": "QSPIFlashDebug",
+            "name": "HardwareDebug32",
+            "displayName": "HardwareDebug",
             "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "RZA2M_MEMORY_MAP": "QSPIFlash"
+                "RZA2M_MEMORY_MAP": "Hardware",
+                "RZA2M_FB_32BPP": "ON"
+		
             }
         },
         {
-            "name": "QSPIFlashRelease",
-            "displayName": "QSPIFlashRelease",
+            "name": "HardwareRelease32",
+            "displayName": "HardwareRelease",
             "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "RZA2M_MEMORY_MAP": "QSPIFlash"
+                "RZA2M_MEMORY_MAP": "Hardware",
+                "RZA2M_FB_32BPP": "ON"
             }
         },
         {
@@ -101,12 +104,12 @@
             "configurePreset": "HardwareRelease"
         },
         {
-            "name": "QSPIFlashDebug",
-            "configurePreset": "QSPIFlashDebug"
+            "name": "HardwareDebug32",
+            "configurePreset": "HardwareDebug32"
         },
         {
-            "name": "QSPIFlashRelease",
-            "configurePreset": "QSPIFlashRelease"
+            "name": "HardwareRelease32",
+            "configurePreset": "HardwareRelease32"
         },
         {
             "name": "HyperRAMDebug",
