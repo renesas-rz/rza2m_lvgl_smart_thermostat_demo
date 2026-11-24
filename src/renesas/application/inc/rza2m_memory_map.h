@@ -86,13 +86,20 @@
 #ifndef RZA2M_FB_CLUT8
     #define RZA2M_FB_CLUT8 0
 #endif
+#ifndef RZA2M_FB_32BPP
+    #define RZA2M_FB_32BPP 0
+#endif
+
 #if RZA2M_FB_CLUT8 && !RZA2M_FB_COPY_FLUSH
     #error "RZA2M_FB_CLUT8 needs RZA2M_FB_COPY_FLUSH (HyperRAM memory map)"
 #endif
 #if RZA2M_FB_CLUT8
     #define RZA2M_FB_BPP        (1u)       /* bytes per pixel in the frame buffers the VDC reads */
+#elif RZA2M_FB_32BPP
+	#define RZA2M_FB_BPP        (4u)
 #else
     #define RZA2M_FB_BPP        (2u)
+    
 #endif
 
 /* Measure and print the HyperRAM read bandwidth at start-up (part of hyperram_selftest()). */

@@ -83,7 +83,11 @@
 #define GRAPHICS_LAYER_HEIGHT   (LCD_CH0_DISP_VW)
 
 #define GRAPHICS_BUFFER_NUM             (2u)
+#if RZARM_FB_32BPP
+#define GRAPHICS_BUFFER_BYTE_PER_PIXEL  (4u)
+#else
 #define GRAPHICS_BUFFER_BYTE_PER_PIXEL  (2u)
+#endif
 #define GRAPHICS_BUFFER_STRIDE  ((( GRAPHICS_LAYER_WIDTH * GRAPHICS_BUFFER_BYTE_PER_PIXEL ) + (RZA2M_FB_ALIGN - 1u)) & ~(RZA2M_FB_ALIGN - 1u))
 #define GRAPHICS_BUFFER_BYTES   (GRAPHICS_BUFFER_STRIDE * GRAPHICS_LAYER_HEIGHT)   /* one RGB565 frame, incl. stride padding */
 
@@ -774,6 +778,9 @@ bool_t RM_LVGL_PORT_Open (void)
 #if RZA2M_FB_CLUT8
         gr_disp_cnf.read_format      = VDC_GR_FORMAT_CLUT8;
         gr_disp_cnf.clut_table       = g_clut8_palette;
+#elif RZA2M_FB_32BPP
+        gr_disp_cnf.read_format      = VDC_GR_FORMAT_ARGB8888;
+        gr_disp_cnf.clut_table       = NULL;
 #else
         gr_disp_cnf.read_format      = VDC_GR_FORMAT_RGB565;
         gr_disp_cnf.clut_table       = NULL;
@@ -781,6 +788,8 @@ bool_t RM_LVGL_PORT_Open (void)
         gr_disp_cnf.read_ycc_swap    = VDC_GR_YCCSWAP_Y0CBY1CR;
 #if RZA2M_FB_CLUT8
         gr_disp_cnf.read_swap        = VDC_WR_RD_WRSWA_32_16_8BIT;   /* 8-bit pixels: reverse all 8 bytes of a 64-bit word */
+#elif RZA2M_FB_32BPP
+        gr_disp_cnf.read_swap        = VDC_WR_RD_WRSWA_32_32BIT;   /* 32-bit pixels: reverse all 4 bytes of a 32-bit word */
 #else
         gr_disp_cnf.read_swap        = VDC_WR_RD_WRSWA_32_16BIT;
 #endif
@@ -826,6 +835,9 @@ bool_t RM_LVGL_PORT_Open (void)
     {
         return FALSE;
     }
+#if RZA2M_FB_32BPP
+    lv_display_set_color_format (p_lv_display, LV_COLOR_FORMAT_ARGB8888);
+#endif
 
 //    p_lv_display->render_mode = LV_DISPLAY_RENDER_MODE_PARTIAL;
     p_lv_display->render_mode = LV_DISPLAY_RENDER_MODE_DIRECT;
